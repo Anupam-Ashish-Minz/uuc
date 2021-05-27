@@ -2,19 +2,35 @@ use std::env::args;
 use std::path::PathBuf;
 use std::fs::read_to_string;
 
+mod cli;
+
+use cli::parse_options;
+
 fn main() {
+    parse_options();
+    let path = PathBuf::from("src");
+    let dir_list = list_files(path);
+    println!("{:?}", dir_list);
+}
+
+fn alt_main() {
     let arg = args().nth(1).expect("no argument");
-    let mut path = PathBuf::new();
-    path.push(arg);
-    let list_of_dirs = list_dirs(path);
-    let list_of_dirs: Vec<_> = list_of_dirs.iter().filter_map(|x| read_to_string(x).ok()).collect();
+    let path = PathBuf::from(arg.trim());
+
+    let list_of_dirs = list_files(path);
+
+    let list_of_dirs: Vec<_> = list_of_dirs
+        .iter()
+        .filter_map(|x| read_to_string(x).ok())
+        .collect();
+
     for i in list_of_dirs.iter() {
         println!("{}", i);
     }
 }
 
 // like a ls clone
-fn list_dirs(path: PathBuf) -> Vec<PathBuf> {
+fn list_files(path: PathBuf) -> Vec<PathBuf> {
     let path: Vec<_> = path
         .read_dir()
         .expect("failed to read dirs")
